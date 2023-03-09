@@ -30,10 +30,25 @@ CREATE TABLE `tikoz_calltaxi` (
   `pos` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `tikoz_stockweapon` (
+  `id` int(5) NOT NULL,
+  `name` varchar(30) NOT NULL,
+  `label` varchar(30) NOT NULL,
+  `balle` int(4) NOT NULL,
+  `job` varchar(15) NOT NULL,
+  `gang` varchar(15) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `tikoz_calltaxi`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `tikoz_calltaxi`
   MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+COMMIT;
+
+ALTER TABLE `tikoz_stockweapon`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `tikoz_stockweapon`
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 COMMIT;
