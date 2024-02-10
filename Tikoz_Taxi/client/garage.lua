@@ -1,6 +1,5 @@
 ESX = exports["es_extended"]:getSharedObject()
 
-openmenu = false
 
 menugarage = {
     Base = {Header = {"commonmenu", "interaction_bgd"}, Color = {color_black}, HeaderColor = {0, 251, 255}, Title = "Garage"},
@@ -10,7 +9,6 @@ menugarage = {
             for i=1, #Listecar, 1 do 
                 if btn.name == Listecar[i].name then
                     CloseMenu()
-                    openmenu = true
                     local name = Listecar[i].name 
                     local label = Listecar[i].model 
                     local hash = GetHashKey(label) 
@@ -52,7 +50,6 @@ function spawncar(name, label)
                     if IsControlJustPressed(1,51) then
                         veh = GetVehiclePedIsIn(PlayerPedId(), false)
                         DeleteVehicle(veh)
-                        openmenu = false
                     end
                 else
                     Wait(1000)
@@ -85,9 +82,7 @@ CreateThread(function()
             DrawMarker(6, menu, nil, nil, nil, -90, nil, nil, 0.7, 0.7, 0.7, 0, 251, 255, 200, false, true, 2, false, false, false, false)
 
             if IsControlJustPressed(1,51) then
-                if not openmenu then
-                    CreateMenu(menugarage)
-                end
+                CreateMenu(menugarage)
             end
         else
             Wait(1000)

@@ -26,6 +26,8 @@ Config.Pos = {
 
     Coffre = vector3(909.16, -159.41, 73.14),
 
+    Vestiaire = vector3(896.19, -144.78, 76.79),
+
     Boss = vector3(907.06, -162.27, 73.12)
 
 }
@@ -38,6 +40,24 @@ Listecar = { -- Vous pouvez choisir quel véhicule vous-voulez dans votre garage
 
 Config.Time = 10000 -- Temps à attendre avant de pouvoir rappeller un taxi ( c'est en milliseconde, 1 seconde = 1000 )
 
+
+Config.Tenue = {
+	Homme = {
+		['tshirt_1'] = 15, ['tshirt_2'] = 0,
+		['torso_1'] = 65, ['torso_2'] = 0,
+		['arms'] = 0,
+		['pants_1'] = 38, ['pants_2'] = 0,
+		['shoes_1'] = 25, ['shoes_2'] = 0,
+	},
+
+	Femme = {
+		['tshirt_1'] = 38,['tshirt_2'] = 0,
+		['torso_1'] = 57, ['torso_2'] = 0,
+		['arms'] = 21, ['arms_2'] = 0,
+		['pants_1'] = 11, ['pants_2'] = 1,
+		['shoes_1'] = 49, ['shoes_2'] = 0,
+	}
+}
 
 
 -- ███╗   ███╗██╗███████╗███████╗██╗ ██████╗ ███╗   ██╗    ██████╗ ███╗   ██╗     ██╗
