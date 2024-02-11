@@ -1,6 +1,6 @@
 ESX = exports["es_extended"]:getSharedObject()
 
-local openmenu = false
+local canceljob, cando, clientpnj = false, true
 
 function Keyboardput(TextEntry, ExampleText, MaxStringLength) 
     AddTextEntry('FMMC_KEY_TIP1', TextEntry .. ':')
@@ -34,8 +34,16 @@ menumission = {
     Data = {currentMenu = "Menu :"},
     Events = {
         onSelected = function(self, _, btn, PMenu, menuData, result)
-            if btn.name == "Commencez les missions" then
+            if btn.name == "Commencez les missions" and (cando) then
+                cando = false
+                canceljob = false
                 init_mission()
+            elseif (btn.name == "~r~Annuler") and (not cando) then
+                ESX.ShowNotification("~g~Vous avez annuler votre course")
+                cando = true
+                canceljob = true
+                DeleteWaypoint()
+                DeleteEntity(clientpnj)
             end
         end,
 },
@@ -43,6 +51,7 @@ menumission = {
         ["Menu :"] = {
             b = {
                 {name = "Commencez les missions", ask = "", askX = true},
+                {name = "~r~Annuler", ask = "", askX = true},
             }
         }
     }
@@ -61,12 +70,12 @@ function init_mission()
     local po = GetHashKey(pi)
     RequestModel(po)
     while not HasModelLoaded(po) do Wait(0) end
-    local pipo = CreatePed(6, po, spawnped.x, spawnped.y, spawnped.z, 12.21, true, false)
-    local posped = GetEntityCoords(pipo)
+    clientpnj = CreatePed(6, po, spawnped.x, spawnped.y, spawnped.z, 12.21, true, false)
+    local posped = GetEntityCoords(clientpnj)
     goclient = #(pos - posped)
     SetNewWaypoint(posped.x, posped.y)
     
-    local blip = AddBlipForEntity(pipo)
+    local blip = AddBlipForEntity(clientpnj)
     SetBlipSprite (blip, Config.Blip.Id)
 	SetBlipDisplay(blip, 4)
 	SetBlipScale(blip, Config.Blip.Taille)
@@ -76,17 +85,17 @@ function init_mission()
 	BeginTextCommandSetBlipName("STRING")
 	AddTextComponentString("Client taxi")
 	EndTextCommandSetBlipName(blip)
-    openmenu = true
-    findclient(pipo, posped, blip, goclient)
+    findclient(clientpnj, posped, blip, goclient)
 
 end
 
-function findclient(pipo, posped, blip, goclient)
+function findclient(clientpnj, posped, blip, goclient)
     CreateThread(function()
         local msg = false
         local wait, dist = 0, nil
         while (function()
             wait = 1000
+            if (canceljob) then return (false) end
             dist = #(GetEntityCoords(PlayerPedId()) - posped)
             if dist > 10 then return true end 
                 
@@ -96,7 +105,7 @@ function findclient(pipo, posped, blip, goclient)
             if IsControlJustPressed(1, 51) then
                 RemoveBlip(blip)
                 local healtveh = GetEntityHealth(GetVehiclePedIsIn(PlayerPedId(), false))
-                startmission(pipo, posped, blip, goclient, healtveh)
+                startmission(clientpnj, posped, blip, goclient, healtveh)
                 return 
             end
             return true
@@ -105,12 +114,12 @@ function findclient(pipo, posped, blip, goclient)
     end)
 end
 
-function startmission(pipo, posped, blip, goclient, healtveh)
+function startmission(clientpnj, posped, blip, goclient, healtveh)
 
     local ped = PlayerPedId()
     local pos = GetEntityCoords(ped)
     local veh = GetVehiclePedIsIn(ped, false)
-    TaskEnterVehicle(pipo, veh, 10000, 1, 1.0, 1)
+    TaskEnterVehicle(clientpnj, veh, 10000, 1, 1.0, 1)
     local destpos = ClientPosition[math.random(1, #ClientPosition)]
     SetNewWaypoint(destpos.x, destpos.y)
     local destination = vector3(destpos.x, destpos.y, destpos.z)
@@ -129,7 +138,7 @@ function startmission(pipo, posped, blip, goclient, healtveh)
 
         local tikoz = #(pos - destination)
         while true do 
-
+            if (canceljob) then return (false) end
             local pos = GetEntityCoords(PlayerPedId())
             local dist = #(pos - destination)
             
@@ -138,9 +147,10 @@ function startmission(pipo, posped, blip, goclient, healtveh)
                 ESX.ShowHelpNotification("Appuie sur ~INPUT_CONTEXT~ pour terminer la ~b~course~")
 
                 if IsControlJustPressed(1,51) then
+                    cando = true
                     if Config.Mission.StartDegat then
                         acthealt = GetEntityHealth(GetVehiclePedIsIn(PlayerPedId(), false))
-                        TaskWanderStandard(pipo, 10.0, 10)
+                        TaskWanderStandard(clientpnj, 10.0, 10)
                         RemoveBlip(destblip)
                         dif = toPercent(healtveh)-toPercent(acthealt)
                         if dif >= Config.Mission.DegatMax then
@@ -149,14 +159,12 @@ function startmission(pipo, posped, blip, goclient, healtveh)
                             local payeentreprise, pourcentage = Config.Mission.PayeEntreprise, Config.Mission.Pourcentage
                             TriggerServerEvent("Tikoz/TaxiBuyMission", Config.Mission.Paye, calculatedprice(tikoz), calculatedprice(goclient), payeentreprise, pourcentage)    
                         end
-                        openmenu = false
                         return startmission
                     else
-                        TaskWanderStandard(pipo, 10.0, 10)
+                        TaskWanderStandard(clientpnj, 10.0, 10)
                         RemoveBlip(destblip)
                         local payeentreprise, pourcentage = Config.Mission.PayeEntreprise, Config.Mission.Pourcentage
                         TriggerServerEvent("Tikoz/TaxiBuyMission", Config.Mission.Paye, calculatedprice(tikoz), calculatedprice(goclient), payeentreprise, pourcentage)    
-                        openmenu = false
                         return startmission
                     end
                 end
@@ -169,7 +177,7 @@ function startmission(pipo, posped, blip, goclient, healtveh)
 end
 
 keyRegister("missiontaxi", "Mission taxi", "L", function()
-    if ESX.PlayerData.job.name == "taxi" and not openmenu then
+    if ESX.PlayerData.job.name == "taxi" then
         if IsPedInAnyVehicle(PlayerPedId(), true) then
             CreateMenu(menumission)            
         end
